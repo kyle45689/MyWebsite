@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LKM Group: supplier invoices, checked (Copy)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f1f5fb;--sheet:#ffffff;--ink:#0e1c36;--mute:#52617c;--line:#d5deec;
+  --blue:#1e4fd6;--blueh:#173fb0;--on:#ffffff;
+  --hl:#ffe066;--hlink:#2a2100;
+  --bad:#b42318;--ok:#17703f;--okbg:#e3f4ea;
+  --panel:#0e1c36;--pink:#f1f5fb;--pmute:#a9b7d1;--pline:#2b3b5c;--pfield:#16264a;--perr:#ffb0a6;
+  --shadow:0 1px 0 rgba(14,28,54,.04),0 18px 40px -18px rgba(14,28,54,.28);
+  color-scheme:light;box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0a111e;--sheet:#121b2d;--ink:#e8eefb;--mute:#96a4bd;--line:#26334c;
+  --blue:#7ea8ff;--blueh:#a3c1ff;--on:#08101f;
+  --hl:#e9c84a;--hlink:#1c1600;
+  --bad:#ff9a8d;--ok:#72d49b;--okbg:#12301f;
+  --panel:#16223a;--pink:#e8eefb;--pmute:#96a4bd;--pline:#2c3b59;--pfield:#0d1626;--perr:#ffb0a6;
+  --shadow:0 18px 40px -18px rgba(0,0,0,.6);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0a111e;--sheet:#121b2d;--ink:#e8eefb;--mute:#96a4bd;--line:#26334c;
+  --blue:#7ea8ff;--blueh:#a3c1ff;--on:#08101f;
+  --hl:#e9c84a;--hlink:#1c1600;
+  --bad:#ff9a8d;--ok:#72d49b;--okbg:#12301f;
+  --panel:#16223a;--pink:#e8eefb;--pmute:#96a4bd;--pline:#2c3b59;--pfield:#0d1626;--perr:#ffb0a6;
+  --shadow:0 18px 40px -18px rgba(0,0,0,.6);
+  color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 "Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+.num{font-variant-numeric:tabular-nums}
+.mute{color:var(--mute);font-size:14.5px}
+h1,h2,.logo,.big{font-family:"Bricolage Grotesque","Instrument Sans",system-ui,sans-serif}
+a{color:var(--blue)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:4px}
+
+/* top */
+.top{display:flex;align-items:center;justify-content:space-between;padding-top:22px;padding-bottom:22px}
+.logo{font-weight:800;font-size:21px;letter-spacing:-.01em;color:var(--ink)}
+.top a{font-weight:600;font-size:15px;text-decoration:none}
+.top a:hover{text-decoration:underline}
+.stick{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--sheet);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));transition:transform .2s}
+.stick a{display:block;text-align:center;background:var(--blue);color:var(--on);font-weight:700;text-decoration:none;border-radius:999px;padding:13px 18px}
+.stick.off{transform:translateY(110%);visibility:hidden}
+.top a{display:none}body{padding-bottom:76px}.stick a{max-width:420px;margin:0 auto}
+
+/* hero */
+.hero{display:grid;gap:40px;padding-top:28px;padding-bottom:64px}
+h1{font-size:clamp(38px,10.5vw,70px);line-height:1;letter-spacing:-.035em;font-weight:800;margin:0 0 26px}
+.lede p{margin:0 0 14px;max-width:34em}
+.cta{display:inline-block;margin-top:14px;background:var(--blue);color:var(--on);font-weight:600;text-decoration:none;border-radius:999px;padding:14px 26px}
+.cta:hover{background:var(--blueh)}
+.lede p.free{display:inline-block;margin:0 0 24px;padding:8px 16px;background:var(--hl);color:var(--hlink);font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:22px;letter-spacing:-.01em;line-height:1.3;border-radius:6px;transform:rotate(-1.5deg)}
+
+/* example invoice */
+.sheet{background:var(--sheet);border-radius:6px;box-shadow:var(--shadow);padding:22px 20px 20px;border-top:5px solid var(--ink)}
+.sheet header{display:flex;justify-content:space-between;gap:12px;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:4px}
+.sheet header b{font-weight:700}
+.row{display:grid;grid-template-columns:1fr auto;gap:2px 14px;padding:13px 0;border-bottom:1px solid var(--line)}
+.row .it{font-weight:600}
+.row .q{grid-column:1;color:var(--mute);font-size:14.5px}
+.row .amt{grid-row:1;grid-column:2;font-weight:600;text-align:right}
+.row .find{grid-column:1/-1;font-size:14.5px;margin-top:4px}
+.find.ok{color:var(--ok)}
+.find.flag{font-weight:600}
+mark{color:var(--hlink);background:linear-gradient(var(--hl),var(--hl)) no-repeat 0 55%/100% 82%;padding:0 .22em;margin:0 -.22em;border-radius:2px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+@media (prefers-reduced-motion:no-preference){
+  mark{animation:swipe .7s cubic-bezier(.3,.7,.2,1) both}
+  mark.d1{animation-delay:.5s}mark.d2{animation-delay:.85s}mark.d3{animation-delay:1.2s}mark.d4{animation-delay:1.55s}
+  @keyframes swipe{from{background-size:0 82%}to{background-size:100% 82%}}
+}
+.tot{display:grid;grid-template-columns:1fr auto;gap:4px 14px;padding-top:14px}
+.tot .was{color:var(--mute)}
+.tot .was + span{color:var(--mute);text-decoration:line-through;text-align:right}
+.tot .now{font-weight:700;align-self:end}
+.tot .big{font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1.1;text-align:right}
+.tot .save{grid-column:1/-1;text-align:right;color:var(--ok);font-weight:600;font-size:14.5px}
+.note{margin:18px 0 0;background:var(--bg);border-radius:6px;padding:14px 16px;font-size:15px}
+.note b{display:block;margin-bottom:4px}
+.cap{margin:12px 2px 0}
+
+/* credit */
+.credit{background:var(--sheet);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.credit .wrap{display:grid;gap:36px;padding-top:56px;padding-bottom:60px}
+h2{font-size:clamp(28px,6vw,40px);line-height:1.05;letter-spacing:-.03em;font-weight:800;margin:0 0 16px}
+.credit p{margin:0 0 14px;max-width:34em}
+.price{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:56px;font-weight:800;letter-spacing:-.04em;line-height:1;margin:26px 0 6px}
+.price small{font-family:"Instrument Sans",system-ui,sans-serif;font-size:16px;font-weight:500;color:var(--mute);letter-spacing:0}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{padding:0;font-weight:700;margin-bottom:10px}
+.chips{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.chip{position:relative;cursor:pointer}
+.chip input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.chip span{display:block;border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--bg)}
+.chip b{display:block;font-size:22px;font-family:"Bricolage Grotesque",system-ui,sans-serif;letter-spacing:-.02em;line-height:1.2}
+.chip small{color:var(--mute);font-size:14px}
+.chip input:checked + span{border-color:var(--blue);background:var(--sheet);box-shadow:inset 0 0 0 1.5px var(--blue)}
+.chip input:focus-visible + span{outline:2px solid var(--blue);outline-offset:3px}
+.other{margin-top:12px}
+.other label{display:block;font-size:14.5px;font-weight:600;color:var(--mute)}
+.field{width:100%;margin-top:6px;font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px}
+.err{color:var(--bad);font-size:14.5px;margin:6px 0 0;min-height:20px}
+
+.auto{margin-top:22px;border-top:1px solid var(--line);padding-top:22px}
+.sw{display:flex;align-items:center;gap:12px;font-weight:700;cursor:pointer}
+.sw input{position:absolute;opacity:0;width:1px;height:1px}
+.track{flex:none;width:50px;height:30px;border-radius:999px;background:var(--line);position:relative;transition:background .15s}
+.track::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--sheet);box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .15s}
+.sw input:checked + .track{background:var(--blue)}
+.sw input:checked + .track::after{transform:translateX(20px)}
+.sw input:focus-visible + .track{outline:2px solid var(--blue);outline-offset:3px}
+.rule{margin:14px 0 0;line-height:2.1}
+.rule select{font:inherit;font-size:16px;font-weight:600;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:5px 8px}
+.sum{margin:18px 0 0;background:var(--bg);border-left:4px solid var(--blue);padding:12px 14px;border-radius:0 6px 6px 0;font-weight:500}
+
+/* signup */
+.start{padding-top:56px;padding-bottom:40px}
+.panel{background:var(--panel);color:var(--pink);border-radius:18px;padding:32px 22px 30px;max-width:620px;margin:0 auto}
+.panel h2{margin-bottom:6px}
+.panel .mute{color:var(--pmute)}
+.trial{list-style:none;margin:18px 0 6px;padding:0;border-top:1px solid var(--pline)}
+.trial li{padding:11px 0;border-bottom:1px solid var(--pline);font-size:15.5px}
+.trial b{color:var(--hl)}
+.panel label.l{display:block;font-size:14.5px;font-weight:600;color:var(--pmute);margin-top:16px}
+.panel .field{background:var(--pfield);border-color:var(--pline);color:var(--pink)}
+.panel .field::placeholder{color:var(--pmute);opacity:.7}
+.panel .err{color:var(--perr)}
+.panel :focus-visible{outline-color:var(--hl)}
+.setup{margin-top:6px;border:1px solid var(--pline);border-radius:10px;padding:12px 14px;font-size:15px}
+.setup a{color:var(--hl);font-weight:600}
+.agree{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:14.5px;cursor:pointer}
+.agree input{flex:none;width:20px;height:20px;margin:2px 0 0;accent-color:var(--hl)}
+.panel button{margin-top:18px;width:100%;font:inherit;font-weight:700;background:var(--hl);color:var(--hlink);border:0;border-radius:999px;padding:15px 18px;cursor:pointer}
+.panel button:hover{filter:brightness(1.06)}
+.done{background:var(--okbg);color:var(--ok);border-radius:12px;padding:20px 22px;font-weight:500;max-width:620px;margin:0 auto}
+footer{padding-top:8px;padding-bottom:48px;text-align:center}
+
+@media (min-width:900px){
+  .hero{grid-template-columns:1.05fr .95fr;gap:64px;align-items:start;padding-top:48px;padding-bottom:96px}
+  .sheet{padding:30px 30px 26px;transform:rotate(1.2deg);margin-top:10px}
+  .credit .wrap{grid-template-columns:1fr 1fr;gap:72px;padding-top:88px;padding-bottom:92px}
+  .chips{grid-template-columns:repeat(4,1fr)}
+  .start{padding-top:88px}
+  .panel{padding:44px 44px 40px}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap top">
+  <div class="logo">LKM Group</div>
+  <a href="#start">Get my free scans</a>
+</div>
+
+<main>
+<section class="wrap hero">
+  <div class="lede">
+    <h1>Supplier invoices checked for <span class="num pr"></span> each.</h1>
+    <p class="free">First <span class="fr"></span> scans free</p>
+    <p>Send us a supplier invoice. We read it and compare it with what you paid and ordered before. If something is wrong, we tell you.</p>
+    <p>A full scan gives you the checks, the right amount to pay, and a note you can send to your supplier.</p>
+
+    
+  </div>
+
+  <div>
+    <div class="sheet" role="img" aria-label="Example of a checked invoice. Two of three lines are flagged, and the invoice total of $1,393.00 is corrected to $1,244.00.">
+      <header><b>Northfield Parts Supply</b><span class="mute num">Invoice 2304</span></header>
+      <div class="row">
+        <span class="it">Brake pad set</span><span class="amt num">$740.00</span>
+        <span class="q num">40 × $18.50</span>
+        <span class="find ok">✓ Matches your order and your usual price</span>
+      </div>
+      <div class="row">
+        <span class="it">Oil filter</span><span class="amt num"><mark class="d1">$588.00</mark></span>
+        <span class="q num">120 × $4.90</span>
+        <span class="find flag"><mark class="d2">You paid $4.20 each on your last three orders</mark></span>
+      </div>
+      <div class="row">
+        <span class="it">Delivery</span><span class="amt num"><mark class="d3">$65.00</mark></span>
+        <span class="q">1 charge</span>
+        <span class="find flag"><mark class="d4">Not on your order</mark></span>
+      </div>
+      <div class="tot">
+        <span class="was">Invoice total</span><span class="num">$1,393.00</span>
+        <span class="now">Corrected amount</span><span class="big num">$1,244.00</span>
+        <span class="save num">$149.00 you should not pay</span>
+      </div>
+      <div class="note">
+        <b>Note to your supplier, ready to send</b>
+        “Invoice 2304 lists oil filters at $4.90. We have paid $4.20 on our last three orders, and delivery was not on our order. Please reissue for $1,244.00.”
+      </div>
+    </div>
+    <p class="mute cap">An example of what you get back. The supplier and amounts are made up.</p>
+  </div>
+</section>
+
+<section class="credit" id="credit">
+  <div class="wrap">
+    <div>
+      <h2>Pay only for what you scan.</h2>
+      <p>Load credit onto your account. Each scan comes off your balance. Top up when it runs low.</p>
+      <div class="price num"><span id="price"></span> <small>per invoice scanned</small></div>
+      <p class="mute" style="margin:0">Prices in US dollars, excluding taxes.</p>
+    </div>
+
+    <div>
+      <fieldset>
+        <legend>How much would you load at a time?</legend>
+        <div class="chips" id="chips"></div>
+        <div class="other">
+          <label for="oth">Or another amount, in dollars</label>
+          <input class="field num" id="oth" type="number" inputmode="decimal" step="1" placeholder="For example 50">
+          <p class="err" id="e0" role="alert"></p>
+        </div>
+      </fieldset>
+
+      <div class="auto">
+        <label class="sw"><input type="checkbox" id="auto" role="switch"><span class="track" aria-hidden="true"></span><span>Top up automatically</span></label>
+        <p class="rule" id="rule" hidden>When my balance drops below
+          <select id="th" aria-label="Balance that triggers a top-up"></select>,
+          load <b class="num" id="ra"></b> from my saved card.</p>
+        <p class="mute" style="margin:10px 0 0">Scanning never stops because you forgot to top up. You can switch this off at any time, and we email a receipt for every top-up.</p>
+      </div>
+
+      <p class="sum num" id="sum" aria-live="polite"></p>
+    </div>
+  </div>
+</section>
+
+<section class="wrap start" id="start">
+  <form class="panel" id="f" novalidate>
+    <h2>Start with <span class="fr"></span> free scans</h2>
+    <p class="mute" style="margin:0">Two quick questions. No card needed until your free scans are used.</p>
+    <ul class="trial num">
+      <li><b>Scan 1:</b> the full report, with the right amount to pay and the note to your supplier.</li>
+      <li><b>Scans 2 to <span class="fr"></span>:</b> a preview that shows if we found a problem. Load credit to see the full details.</li>
+      <li><b>Company email only:</b> free scans are for work email addresses.</li>
+    </ul>
+
+    <label class="l" for="em">Company email</label>
+    <input class="field" id="em" type="email" autocomplete="email" placeholder="you@yourcompany.co.za">
+    <p class="err" id="e1" role="alert"></p>
+
+    <label class="l" for="sw" style="margin-top:0">Accounting software you use</label>
+    <select class="field" id="sw">
+      <option value="">Choose one</option>
+      <option>Sage</option><option>Xero</option><option>QuickBooks</option><option>Odoo</option><option>SAP</option><option>Microsoft Dynamics</option><option>A dealer management system</option><option>Spreadsheets only</option><option>Something else</option>
+    </select>
+    <p class="err" id="e2" role="alert"></p>
+
+    
+    
+    <label class="agree" id="agreeRow" hidden><input type="checkbox" id="agree"><span class="num" id="agreeText"></span></label>
+    <p class="err" id="e3" role="alert"></p>
+
+    <button type="submit">Get my free scans</button>
+  </form>
+  <div class="done num" id="ok" hidden></div>
+</section>
+</main>
+
+<div class="stick" id="stick"><a href="#start">Get my free scans</a></div>
+
+<footer class="wrap mute">LKM Group. Invoices are used only to check them for you.</footer>
+
+<script>
+// Edit these numbers to change the offer everywhere on the page.
+const PRICE_PER_SCAN=0.30, FREE_SCANS=5;
+const TOPUP_AMOUNTS=[15,30,75,150];   // credit packs, in dollars
+const DEFAULT_TOPUP=30;               // pack selected when the page opens
+const MIN_TOPUP=15;                   // smallest "other amount" allowed
+const AUTO_THRESHOLDS=[10,25,50];     // "when my balance drops below N invoices"
+const DEFAULT_THRESHOLD=25;
+
+const FREE_MAIL=["gmail.com","googlemail.com","yahoo.com","yahoo.co.za","ymail.com","hotmail.com","hotmail.co.za","outlook.com","outlook.co.za","live.com","live.co.za","msn.com","icloud.com","me.com","aol.com","proton.me","protonmail.com","mweb.co.za","webmail.co.za","telkomsa.net","vodamail.co.za","gmx.com","mail.com","zoho.com"];
+const $=id=>document.getElementById(id);
+const money=n=>"$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const scansFor=a=>Math.floor(Math.round(a*100)/Math.round(PRICE_PER_SCAN*100));
+
+$("price").textContent=money(PRICE_PER_SCAN);
+document.querySelectorAll(".pr").forEach(e=>e.textContent=money(PRICE_PER_SCAN));
+document.querySelectorAll(".fr").forEach(e=>e.textContent=FREE_SCANS);
+
+// Credit packs
+$("chips").innerHTML=TOPUP_AMOUNTS.map(a=>
+  '<label class="chip"><input type="radio" name="amt" value="'+a+'"'+(a===DEFAULT_TOPUP?" checked":"")+'><span><b>$'+a+'</b><small>'+scansFor(a).toLocaleString("en-US")+' invoices</small></span></label>'
+).join("");
+$("th").innerHTML=AUTO_THRESHOLDS.map(t=>'<option value="'+t+'"'+(t===DEFAULT_THRESHOLD?" selected":"")+'>'+t+' invoices</option>').join("");
+
+let amount=DEFAULT_TOPUP;
+function readAmount(){
+  $("e0").textContent="";
+  const raw=$("oth").value.trim();
+  if(raw!==""){
+    const v=Number(raw);
+    if(!isFinite(v)||v<MIN_TOPUP){$("e0").textContent="The smallest top-up is "+money(MIN_TOPUP)+".";return false}
+    amount=Math.round(v*100)/100;return true;
+  }
+  const r=document.querySelector('input[name="amt"]:checked');
+  if(r){amount=Number(r.value);return true}
+  return false;
+}
+function render(){
+  const ok=readAmount(), auto=$("auto").checked, th=Number($("th").value);
+  $("rule").hidden=!auto;
+  $("ra").textContent=money(amount);
+  let s="You load "+money(amount)+", which covers "+scansFor(amount).toLocaleString("en-US")+" invoices.";
+  let setup=money(amount)+" top-ups.";
+  if(auto){
+    s+=" When fewer than "+th+" are left, we load another "+money(amount)+" automatically.";
+    setup=money(amount)+" top-ups, loaded automatically when fewer than "+th+" invoices are left.";
+  }else{
+    s+=" We warn you when your balance runs low and you top up yourself.";
+    setup+=" You top up yourself when your balance runs low.";
+  }
+  if(ok){$("sum").textContent=s}
+  $("agreeRow").hidden=!auto;
+  if(!auto){$("agree").checked=false;$("e3").textContent=""}
+  $("agreeText").textContent="I agree that LKM Group may charge my saved card "+money(amount)+" each time my balance drops below "+th+" invoices, until I switch this off.";
+  return ok;
+}
+document.querySelectorAll('input[name="amt"]').forEach(r=>r.addEventListener("change",()=>{$("oth").value="";render()}));
+$("oth").addEventListener("input",()=>{
+  const used=$("oth").value.trim()!=="";
+  document.querySelectorAll('input[name="amt"]').forEach(r=>{
+    if(used)r.checked=false;
+  });
+  if(!used){const d=document.querySelector('input[name="amt"][value="'+DEFAULT_TOPUP+'"]');if(d)d.checked=true}
+  render();
+});
+$("auto").addEventListener("change",render);
+$("th").addEventListener("change",render);
+render();
+
+const stick=$("stick");
+if("IntersectionObserver" in window){new IntersectionObserver(es=>{stick.classList.toggle("off",es[0].isIntersecting)},{threshold:.15}).observe($("start"))}
+
+$("f").addEventListener("submit",e=>{
+  e.preventDefault();
+  const m=$("em").value.trim().toLowerCase(),sw=$("sw").value;let bad=false;
+  $("e1").textContent="";$("e2").textContent="";$("e3").textContent="";
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m)){$("e1").textContent="Please enter a valid email address.";bad=true}
+  else if(FREE_MAIL.includes(m.split("@")[1])){$("e1").textContent="Please use your work or company email address to start your free scans.";bad=true}
+  if(!sw){$("e2").textContent="Please choose the accounting software you use.";bad=true}
+  if(!render()){$("e3").textContent="Choose a top-up of "+money(MIN_TOPUP)+" or more in the credit section above.";bad=true}
+  else if($("auto").checked&&!$("agree").checked){$("e3").textContent="Tick the box to agree to automatic top-ups, or switch them off above.";bad=true}
+  if(bad)return;
+  const auto=$("auto").checked, th=Number($("th").value);
+  // The signup to send to your server: {email:m, software:sw, topup:amount, auto:auto, threshold:th}
+  $("f").hidden=true;$("ok").hidden=false;stick.remove();
+  $("ok").textContent="Thank you. We will email "+m+" with your link to start your "+FREE_SCANS+" free scans. "+
+    (auto
+      ? "Automatic top-up is set: "+money(amount)+" when fewer than "+th+" invoices are left. You add your card once your free scans are used, and nothing is charged before then."
+      : "When your free scans are used, you load "+money(amount)+" of credit to keep going.");
+  $("ok").scrollIntoView({block:"center"});
+});
+</script>
+</body>
+</html>
